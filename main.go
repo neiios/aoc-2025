@@ -1,6 +1,7 @@
 package main
 
 import (
+	"aoc/day1"
 	"aoc/day2"
 	"flag"
 	"fmt"
@@ -13,8 +14,9 @@ func main() {
 
 	switch *dFlag {
 	case 1:
-		part1, _ := RunDay1Part1("./input/day1.txt")
-		part2, _ := RunDay1Part2("./input/day1.txt")
+		content, _ := os.ReadFile("./input/day1.txt")
+		part1, _ := day1.SolvePart1(string(content))
+		part2, _ := day1.SolvePart2(string(content))
 		fmt.Println(part1, part2)
 	case 2:
 		content, _ := os.ReadFile("./input/day2.txt")

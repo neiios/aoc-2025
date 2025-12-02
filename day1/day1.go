@@ -1,10 +1,9 @@
-package main
+package day1
 
 import (
 	"bufio"
-	"log"
-	"os"
 	"strconv"
+	"strings"
 )
 
 type Rotation struct {
@@ -24,16 +23,10 @@ func parseLine(line string) (Rotation, error) {
 	}, nil
 }
 
-func parseInput(filename string) ([]Rotation, error) {
-	input, err := os.Open(filename)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer input.Close()
-
+func parseInput(input string) ([]Rotation, error) {
 	var rotations = []Rotation{}
 
-	scanner := bufio.NewScanner(input)
+	scanner := bufio.NewScanner(strings.NewReader(input))
 	for scanner.Scan() {
 		var line = scanner.Text()
 		rotation, err := parseLine(line)
@@ -50,15 +43,15 @@ func parseInput(filename string) ([]Rotation, error) {
 	return rotations, nil
 }
 
-func RunDay1Part1(filename string) (int, error) {
-	rotations, err := parseInput(filename)
+func SolvePart1(input string) (int, error) {
+	rotations, err := parseInput(input)
 	if err != nil {
 		return 0, err
 	}
-	return rotatePart1(rotations, 50), nil
+	return rotate1(rotations, 50), nil
 }
 
-func rotatePart1(rotations []Rotation, initialDial int) int {
+func rotate1(rotations []Rotation, initialDial int) int {
 	var dial = initialDial
 	var password = 0
 	for _, rotation := range rotations {
@@ -76,15 +69,15 @@ func rotatePart1(rotations []Rotation, initialDial int) int {
 	return password
 }
 
-func RunDay1Part2(filename string) (int, error) {
-	rotations, err := parseInput(filename)
+func SolvePart2(input string) (int, error) {
+	rotations, err := parseInput(input)
 	if err != nil {
 		return 0, err
 	}
-	return rotatePart2(rotations, 50), nil
+	return rotate2(rotations, 50), nil
 }
 
-func rotatePart2(rotations []Rotation, initialDial int) int {
+func rotate2(rotations []Rotation, initialDial int) int {
 	var dial = initialDial
 	var password = 0
 	for _, rotation := range rotations {
