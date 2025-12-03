@@ -2,6 +2,7 @@ package lib
 
 import (
 	"math"
+	"math/big"
 
 	"golang.org/x/exp/constraints"
 )
@@ -23,14 +24,14 @@ func RangeInt(a, b int) []int {
 }
 
 // Length of an integer
-func LengthInt(i int) int {
+func LengthInt[T constraints.Integer](i T) T {
 	if i == 0 {
 		return 1
 	}
 	if i < 0 {
 		i = -i
 	}
-	length := 0
+	var length T
 	for i > 0 {
 		i /= 10
 		length++
@@ -48,20 +49,40 @@ func Sum[T constraints.Integer | constraints.Float](numbers []T) T {
 }
 
 // Splits an integer into equally sized chunks
-func ChunkInt(i int, size int) []int {
+func ChunkInt[T constraints.Integer](i T, size int) []T {
 	length := LengthInt(i)
-	if size < 1 || size >= length {
-		return []int{i}
+	if size < 1 || size >= int(length) {
+		return []T{i}
 	}
 
-	chunks := []int{}
+	chunks := []T{}
 	for length > 0 {
-		chunkSize := min(length, size)
-		divisor := int(math.Pow10(length - chunkSize))
+		chunkSize := min(length, T(size))
+		divisor := T(math.Pow10(int(length - chunkSize)))
 		chunk := i / divisor
 		chunks = append(chunks, chunk)
 		i = i % divisor
 		length -= chunkSize
+	}
+
+	return chunks
+}
+
+// Splits a big integer into equally sized chunks
+func ChunkBigInt(num *big.Int, size int) []*big.Int {
+	str := num.String()
+	if size < 1 || size >= len(str) {
+		return []*big.Int{new(big.Int).Set(num)}
+	}
+
+	chunks := []*big.Int{}
+	for len(str) > 0 {
+		chunkSize := min(len(str), size)
+		chunkStr := str[:chunkSize]
+		chunk := new(big.Int)
+		chunk.SetString(chunkStr, 10)
+		chunks = append(chunks, chunk)
+		str = str[chunkSize:]
 	}
 
 	return chunks
@@ -77,17 +98,27 @@ func All[T any](slice []T, predicate func(T) bool) bool {
 	return true
 }
 
-// Remove duplicate ints from a given slice
-func RemoveDuplicates(slice []int) []int {
-	uniqueMap := make(map[int]bool)
+// Remove duplicates from a given slice
+func RemoveDuplicates[T comparable](slice []T) []T {
+	uniqueMap := make(map[T]bool)
 	for _, val := range slice {
 		uniqueMap[val] = true
 	}
 
-	result := make([]int, 0, len(uniqueMap))
+	result := make([]T, 0, len(uniqueMap))
 	for key := range uniqueMap {
 		result = append(result, key)
 	}
 
+	return result
+}
+
+// Combines a list of integers into a single integer by concatenating them
+func CombineInts[T constraints.Integer](numbers []T) T {
+	var result T
+	for _, num := range numbers {
+		digits := LengthInt(num)
+		result = result*T(math.Pow10(int(digits))) + num
+	}
 	return result
 }
