@@ -3,7 +3,6 @@ package day3
 import (
 	"aoc/lib"
 	"bufio"
-	"math/big"
 	"strings"
 )
 
@@ -12,14 +11,12 @@ func parseInput(input string) ([]*Bank, error) {
 	banks := []*Bank{}
 	for scanner.Scan() {
 		line := scanner.Text()
-		num := new(big.Int)
-		num.SetString(line, 10)
-		digits := lib.ChunkBigInt(num, 1)
+		digits := lib.ChunkStrToInts(line, 1)
 
 		batteries := make([]*Battery, len(digits))
 		for i, digit := range digits {
 			batteries[i] = &Battery{
-				joltage: int(digit.Int64()),
+				joltage: digit,
 				on:      false,
 				index:   i,
 			}

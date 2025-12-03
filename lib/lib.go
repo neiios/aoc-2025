@@ -2,7 +2,7 @@ package lib
 
 import (
 	"math"
-	"math/big"
+	"strconv"
 
 	"golang.org/x/exp/constraints"
 )
@@ -49,16 +49,16 @@ func Sum[T constraints.Integer | constraints.Float](numbers []T) T {
 }
 
 // Splits an integer into equally sized chunks
-func ChunkInt[T constraints.Integer](i T, size int) []T {
+func ChunkInt(i int, size int) []int {
 	length := LengthInt(i)
-	if size < 1 || size >= int(length) {
-		return []T{i}
+	if size < 1 || size >= length {
+		return []int{i}
 	}
 
-	chunks := []T{}
+	chunks := []int{}
 	for length > 0 {
-		chunkSize := min(length, T(size))
-		divisor := T(math.Pow10(int(length - chunkSize)))
+		chunkSize := min(length, size)
+		divisor := int(math.Pow10(length - chunkSize))
 		chunk := i / divisor
 		chunks = append(chunks, chunk)
 		i = i % divisor
@@ -68,21 +68,20 @@ func ChunkInt[T constraints.Integer](i T, size int) []T {
 	return chunks
 }
 
-// Splits a big integer into equally sized chunks
-func ChunkBigInt(num *big.Int, size int) []*big.Int {
-	str := num.String()
-	if size < 1 || size >= len(str) {
-		return []*big.Int{new(big.Int).Set(num)}
+// Splits a string representation of a number into equally sized chunks and converts them to integers
+func ChunkStrToInts(s string, size int) []int {
+	if size < 1 || size >= len(s) {
+		val, _ := strconv.Atoi(s)
+		return []int{val}
 	}
 
-	chunks := []*big.Int{}
-	for len(str) > 0 {
-		chunkSize := min(len(str), size)
-		chunkStr := str[:chunkSize]
-		chunk := new(big.Int)
-		chunk.SetString(chunkStr, 10)
-		chunks = append(chunks, chunk)
-		str = str[chunkSize:]
+	chunks := []int{}
+	for len(s) > 0 {
+		chunkSize := min(len(s), size)
+		chunkStr := s[:chunkSize]
+		val, _ := strconv.Atoi(chunkStr)
+		chunks = append(chunks, val)
+		s = s[chunkSize:]
 	}
 
 	return chunks
