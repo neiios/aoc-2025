@@ -4,6 +4,7 @@ import (
 	"aoc/day1"
 	"aoc/day2"
 	"aoc/day3"
+	"aoc/day4"
 	"flag"
 	"fmt"
 	"os"
@@ -28,6 +29,11 @@ func main() {
 		content, _ := os.ReadFile("./input/day3.txt")
 		part1, _ := day3.SolvePart1(string(content))
 		part2, _ := day3.SolvePart2(string(content))
+		fmt.Println(part1, part2)
+	case 4:
+		content, _ := os.ReadFile("./input/day4.txt")
+		part1, _ := day4.SolvePart1(string(content))
+		part2, _ := day4.SolvePart2(string(content))
 		fmt.Println(part1, part2)
 	default:
 		fmt.Println("Invalid day:", *dFlag)
