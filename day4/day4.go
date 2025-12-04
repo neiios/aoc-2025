@@ -5,35 +5,30 @@ import (
 	"strings"
 )
 
-func parseInput(input string) (*Grid, error) {
+func parseInput(input string) (Grid, error) {
 	scanner := bufio.NewScanner(strings.NewReader(input))
-	rows := [][]*Cell{}
+	rows := [][]Cell{}
 	rowIndex := 0
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		chars := strings.Split(line, "")
-		row := []*Cell{}
-		colIndex := 0
-		for _, char := range chars {
-			var cell *Cell
-			if char == "@" {
-				cell = &Cell{state: Occupied, row: rowIndex, col: colIndex}
-			} else {
-				cell = &Cell{state: Empty, row: rowIndex, col: colIndex}
+		row := []Cell{}
+		for colIndex, char := range line {
+			state := Empty
+			if char == '@' {
+				state = Occupied
 			}
-			row = append(row, cell)
-			colIndex++
+			row = append(row, Cell{state: state, row: rowIndex, col: colIndex})
 		}
 		rows = append(rows, row)
 		rowIndex++
 	}
 
 	if err := scanner.Err(); err != nil {
-		return nil, err
+		return Grid{}, err
 	}
 
-	return &Grid{
+	return Grid{
 		rowLen: len(rows),
 		colLen: len(rows[0]),
 		rows:   rows,
@@ -42,7 +37,7 @@ func parseInput(input string) (*Grid, error) {
 
 func SolvePart1(input string) (int, error) {
 	grid, _ := parseInput(input)
-	totalMarked := removeAccesibleRolls(grid)
+	totalMarked := removeAccesibleRolls(&grid)
 	return totalMarked, nil
 }
 
@@ -51,7 +46,7 @@ func SolvePart2(input string) (int, error) {
 	totalMarked := 0
 
 	for {
-		marked := removeAccesibleRolls(grid)
+		marked := removeAccesibleRolls(&grid)
 		totalMarked += marked
 		if marked == 0 {
 			break
@@ -65,21 +60,18 @@ func removeAccesibleRolls(grid *Grid) int {
 	marked := 0
 
 	for i := range grid.rows {
-		row := grid.rows[i]
-		for j := range row {
-			isSurrounded := checkIsSurrounded(row[j], grid)
-			if !isSurrounded && row[j].state == Occupied {
-				row[j] = &Cell{state: Marked, col: row[j].col, row: row[j].row}
+		for j := range grid.rows[i] {
+			if !checkIsSurrounded(grid.rows[i][j], grid) && grid.rows[i][j].state == Occupied {
+				grid.rows[i][j].state = Marked
 			}
 		}
 	}
 
 	for i := range grid.rows {
-		row := grid.rows[i]
-		for j := range row {
-			if row[j].state == Marked {
+		for j := range grid.rows[i] {
+			if grid.rows[i][j].state == Marked {
 				marked++
-				row[j] = &Cell{state: Empty, col: row[j].col, row: row[j].row}
+				grid.rows[i][j].state = Empty
 			}
 		}
 	}
@@ -87,20 +79,17 @@ func removeAccesibleRolls(grid *Grid) int {
 	return marked
 }
 
-func checkIsSurrounded(cell *Cell, grid *Grid) bool {
-	var total = 0
+func checkIsSurrounded(cell Cell, grid *Grid) bool {
+	total := 0
 
 	for _, offset := range offsets {
 		nCol := cell.col + offset[0]
 		nRow := cell.row + offset[1]
-		if nCol < 0 || nRow < 0 {
+		if nCol < 0 || nRow < 0 || nCol >= grid.colLen || nRow >= grid.rowLen {
 			continue
-		} else if nCol >= grid.colLen || nRow >= grid.rowLen {
-			continue
-		} else if grid.rows[nRow][nCol].state != Empty {
+		}
+		if grid.rows[nRow][nCol].state != Empty {
 			total++
-		} else {
-			continue
 		}
 	}
 
@@ -118,7 +107,7 @@ const (
 type Grid struct {
 	rowLen int
 	colLen int
-	rows   [][]*Cell
+	rows   [][]Cell
 }
 
 type Cell struct {
