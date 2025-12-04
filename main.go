@@ -7,35 +7,50 @@ import (
 	"aoc/day4"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 )
 
+type PartSolver func(input string) (int, error)
+
+type Day struct {
+	Day        int
+	SolvePart1 PartSolver
+	SolvePart2 PartSolver
+}
+
 func main() {
-	var dFlag = flag.Int("day", 0, "day to run")
+	day := flag.Int("day", 0, "day to run")
 	flag.Parse()
 
-	switch *dFlag {
+	var solver Day
+	switch *day {
 	case 1:
-		content, _ := os.ReadFile("./input/day1.txt")
-		part1, _ := day1.SolvePart1(string(content))
-		part2, _ := day1.SolvePart2(string(content))
-		fmt.Println(part1, part2)
+		solver = Day{1, day1.SolvePart1, day1.SolvePart2}
 	case 2:
-		content, _ := os.ReadFile("./input/day2.txt")
-		part1, _ := day2.SolvePart1(string(content))
-		part2, _ := day2.SolvePart2(string(content))
-		fmt.Println(part1, part2)
+		solver = Day{2, day2.SolvePart1, day2.SolvePart2}
 	case 3:
-		content, _ := os.ReadFile("./input/day3.txt")
-		part1, _ := day3.SolvePart1(string(content))
-		part2, _ := day3.SolvePart2(string(content))
-		fmt.Println(part1, part2)
+		solver = Day{3, day3.SolvePart1, day3.SolvePart2}
 	case 4:
-		content, _ := os.ReadFile("./input/day4.txt")
-		part1, _ := day4.SolvePart1(string(content))
-		part2, _ := day4.SolvePart2(string(content))
-		fmt.Println(part1, part2)
+		solver = Day{4, day4.SolvePart1, day4.SolvePart2}
 	default:
-		fmt.Println("Invalid day:", *dFlag)
+		log.Fatalf("invalid day %d", *day)
 	}
+
+	content, err := os.ReadFile(fmt.Sprintf("./input/day%d.txt", solver.Day))
+	if err != nil {
+		log.Fatalf("failed reading input: %v", err)
+	}
+
+	result1, err := solver.SolvePart1(string(content))
+	if err != nil {
+		log.Fatalf("failed reading input: %v", err)
+	}
+
+	result2, err := solver.SolvePart2(string(content))
+	if err != nil {
+		log.Fatalf("failed reading input: %v", err)
+	}
+
+	fmt.Println(result1, result2)
 }
