@@ -63,6 +63,7 @@ func removeAccesibleRolls(grid *Grid) int {
 		for j := range grid.rows[i] {
 			if !checkIsSurrounded(grid.rows[i][j], grid) && grid.rows[i][j].state == Occupied {
 				grid.rows[i][j].state = Marked
+				marked++
 			}
 		}
 	}
@@ -70,7 +71,6 @@ func removeAccesibleRolls(grid *Grid) int {
 	for i := range grid.rows {
 		for j := range grid.rows[i] {
 			if grid.rows[i][j].state == Marked {
-				marked++
 				grid.rows[i][j].state = Empty
 			}
 		}
