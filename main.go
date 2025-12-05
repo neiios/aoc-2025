@@ -5,6 +5,7 @@ import (
 	"aoc/day2"
 	"aoc/day3"
 	"aoc/day4"
+	"aoc/day5"
 	"flag"
 	"fmt"
 	"log"
@@ -33,23 +34,25 @@ func main() {
 		solver = Day{3, day3.SolvePart1, day3.SolvePart2}
 	case 4:
 		solver = Day{4, day4.SolvePart1, day4.SolvePart2}
+	case 5:
+		solver = Day{5, day5.SolvePart1, day5.SolvePart2}
 	default:
 		log.Fatalf("invalid day %d", *day)
 	}
 
 	content, err := os.ReadFile(fmt.Sprintf("./input/day%d.txt", solver.Day))
 	if err != nil {
-		log.Fatalf("failed reading input: %v", err)
+		log.Fatalf("file not found: %v", err)
 	}
 
 	result1, err := solver.SolvePart1(string(content))
 	if err != nil {
-		log.Fatalf("failed reading input: %v", err)
+		log.Fatalf("solving part 1 failed: %v", err)
 	}
 
 	result2, err := solver.SolvePart2(string(content))
 	if err != nil {
-		log.Fatalf("failed reading input: %v", err)
+		log.Fatalf("solving part 2 failed: %v", err)
 	}
 
 	fmt.Println(result1, result2)
