@@ -1,6 +1,7 @@
 package day5
 
 import (
+	"fmt"
 	"sort"
 	"strconv"
 	"strings"
@@ -14,26 +15,19 @@ type Range struct {
 func parseInput(input string) ([]Range, []int, error) {
 	parts := strings.Split(input, "\n\n")
 
-	rangeLines := strings.Split(parts[0], "\n")
 	ranges := []Range{}
-
-	for _, line := range rangeLines {
+	for _, line := range strings.Split(parts[0], "\n") {
 		rangeParts := strings.Split(line, "-")
-		from, err := strconv.Atoi(rangeParts[0])
-		if err != nil {
-			return nil, nil, err
-		}
-		to, err := strconv.Atoi(rangeParts[1])
-		if err != nil {
-			return nil, nil, err
+		from, err1 := strconv.Atoi(rangeParts[0])
+		to, err2 := strconv.Atoi(rangeParts[1])
+		if err1 != nil || err2 != nil {
+			return nil, nil, fmt.Errorf("failed to parse range %q", line)
 		}
 		ranges = append(ranges, Range{from: from, to: to})
 	}
 
-	numLines := strings.Split(parts[1], "\n")
 	nums := []int{}
-
-	for _, line := range numLines {
+	for _, line := range strings.Split(parts[1], "\n") {
 		if line == "" {
 			continue
 		}
