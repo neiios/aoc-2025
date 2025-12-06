@@ -48,6 +48,17 @@ func Sum[T constraints.Integer | constraints.Float](numbers []T) T {
 	return sum
 }
 
+func Product[T constraints.Integer | constraints.Float](numbers []T) T {
+	if len(numbers) == 0 {
+		return 0
+	}
+	product := numbers[0]
+	for _, num := range numbers[1:] {
+		product *= num
+	}
+	return product
+}
+
 // Splits an integer into equally sized chunks
 func ChunkInt(i int, size int) []int {
 	length := LengthInt(i)
@@ -118,6 +129,22 @@ func CombineInts[T constraints.Integer](numbers []T) T {
 	for _, num := range numbers {
 		digits := LengthInt(num)
 		result = result*T(math.Pow10(int(digits))) + num
+	}
+	return result
+}
+
+func TransposeMatrix(matrix [][]int) [][]int {
+	rows := len(matrix)
+	cols := len(matrix[0])
+	result := make([][]int, cols)
+	for i := range result {
+		result[i] = make([]int, rows)
+	}
+
+	for i := 0; i < rows; i++ {
+		for j := 0; j < cols; j++ {
+			result[j][i] = matrix[i][j]
+		}
 	}
 	return result
 }
