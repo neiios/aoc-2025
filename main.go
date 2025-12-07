@@ -7,6 +7,7 @@ import (
 	"aoc/day4"
 	"aoc/day5"
 	"aoc/day6"
+	"aoc/day7"
 	"flag"
 	"fmt"
 	"log"
@@ -39,6 +40,8 @@ func main() {
 		solver = Day{5, day5.SolvePart1, day5.SolvePart2}
 	case 6:
 		solver = Day{6, day6.SolvePart1, day6.SolvePart2}
+	case 7:
+		solver = Day{7, day7.SolvePart1, day7.SolvePart2}
 	default:
 		log.Fatalf("invalid day %d", *day)
 	}

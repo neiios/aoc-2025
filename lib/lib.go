@@ -148,3 +148,13 @@ func TransposeMatrix(matrix [][]int) [][]int {
 	}
 	return result
 }
+
+func RemoveEveryNRow(rows []string, n int) []string {
+	var result []string
+	for i, row := range rows {
+		if i%n == 0 {
+			result = append(result, row)
+		}
+	}
+	return result
+}
