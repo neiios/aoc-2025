@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime/pprof"
 )
 
 type PartSolver func(input string) (int, error)
@@ -25,7 +26,20 @@ type Day struct {
 
 func main() {
 	day := flag.Int("day", 0, "day to run")
+	cpuprofile := flag.String("cpuprofile", "", "write cpu profile to `file`")
 	flag.Parse()
+
+	if *cpuprofile != "" {
+		f, err := os.Create(*cpuprofile)
+		if err != nil {
+			log.Fatal("could not create CPU profile: ", err)
+		}
+		defer f.Close()
+		if err := pprof.StartCPUProfile(f); err != nil {
+			log.Fatal("could not start CPU profile: ", err)
+		}
+		defer pprof.StopCPUProfile()
+	}
 
 	var solver Day
 	switch *day {
