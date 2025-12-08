@@ -24,22 +24,25 @@ type DistancePair struct {
 }
 
 func parseInput(input string) ([]JunctionBox, error) {
-	rows := strings.Split(input, "\n")
-	rows = rows[:len(rows)-1]
+	lines := strings.Split(input, "\n")
+	lines = lines[:len(lines)-1]
 	junctionBoxes := []JunctionBox{}
-	for _, row := range rows {
-		parts := strings.Split(row, ",")
+	for _, line := range lines {
+		parts := strings.Split(line, ",")
+		if len(parts) != 3 {
+			return nil, fmt.Errorf("invalid input format: %s", line)
+		}
 		x, errX := strconv.Atoi(parts[0])
 		y, errY := strconv.Atoi(parts[1])
 		z, errZ := strconv.Atoi(parts[2])
 		if errX != nil || errY != nil || errZ != nil {
-			return nil, fmt.Errorf("%v, %v, %v", errX, errY, errZ)
+			return nil, fmt.Errorf("coordinate parsing error: %v, %v, %v", errX, errY, errZ)
 		}
-		junctionBoxes = append(junctionBoxes, JunctionBox{position: Position{x, y, z}, connected: map[int]bool{}, distances: make([]float64, len(rows))})
+		junctionBoxes = append(junctionBoxes, JunctionBox{position: Position{x, y, z}, connected: map[int]bool{}, distances: make([]float64, len(lines))})
 	}
-	for _, junctionBox := range junctionBoxes {
-		for i := range junctionBoxes {
-			junctionBox.distances[i] = findEucDistance(junctionBox.position, junctionBoxes[i].position)
+	for i := range junctionBoxes {
+		for j := range junctionBoxes {
+			junctionBoxes[i].distances[j] = calculateEuclideanDistance(junctionBoxes[i].position, junctionBoxes[j].position)
 		}
 	}
 	return junctionBoxes, nil
@@ -52,33 +55,34 @@ func SolvePart1(input string) (int, error) {
 	}
 
 	for range 1000 {
-		minNotConnectedDistances := make([]DistancePair, len(junctionBoxes))
-		for i := range len(minNotConnectedDistances) {
-			minNotConnectedDistances[i] = DistancePair{math.Inf(1), -1}
+		closestUnconnectedNodes := make([]DistancePair, len(junctionBoxes))
+		for i := range len(closestUnconnectedNodes) {
+			closestUnconnectedNodes[i] = DistancePair{math.Inf(1), -1}
 		}
 
 		for i, junctionBox := range junctionBoxes {
 			for j, distance := range junctionBox.distances {
-				if !junctionBox.connected[j] && distance != 0 && minNotConnectedDistances[i].distance > distance {
-					minNotConnectedDistances[i] = DistancePair{distance, j}
+				if i != j && !junctionBox.connected[j] && closestUnconnectedNodes[i].distance > distance {
+					closestUnconnectedNodes[i] = DistancePair{distance, j}
 				}
 			}
 		}
 
-		minNotConnectedDistance := DistancePair{math.Inf(1), -1}
-		minIndex := -1
-		for i, pair := range minNotConnectedDistances {
-			if minNotConnectedDistance.distance > pair.distance {
-				minNotConnectedDistance = pair
-				minIndex = i
+		minConnectionCandidate := DistancePair{math.Inf(1), -1}
+		sourceNodeIndex := -1
+		for i, pair := range closestUnconnectedNodes {
+			if minConnectionCandidate.distance > pair.distance {
+				minConnectionCandidate = pair
+				sourceNodeIndex = i
 			}
 		}
-		if minIndex == -1 {
+		if sourceNodeIndex == -1 {
 			break
 		}
 
-		junctionBoxes[minIndex].connected[minNotConnectedDistance.index] = true
-		junctionBoxes[minNotConnectedDistance.index].connected[minIndex] = true
+		targetNodeIndex := minConnectionCandidate.index
+		junctionBoxes[sourceNodeIndex].connected[targetNodeIndex] = true
+		junctionBoxes[targetNodeIndex].connected[sourceNodeIndex] = true
 	}
 
 	visited := make([]bool, len(junctionBoxes))
@@ -86,9 +90,9 @@ func SolvePart1(input string) (int, error) {
 
 	for i := range junctionBoxes {
 		if !visited[i] {
-			circuit := []int{}
-			dfs(i, junctionBoxes, visited, &circuit)
-			circuits = append(circuits, circuit)
+			var currentCircuit []int
+			dfs(i, junctionBoxes, visited, &currentCircuit)
+			circuits = append(circuits, currentCircuit)
 		}
 	}
 
@@ -112,65 +116,66 @@ func SolvePart2(input string) (int, error) {
 		return 0, parseErr
 	}
 
-	unifyingConnection := []int{}
+	var finalConnection []int
 	for {
-		minNotConnectedDistances := make([]DistancePair, len(junctionBoxes))
-		for i := range len(minNotConnectedDistances) {
-			minNotConnectedDistances[i] = DistancePair{math.Inf(1), -1}
+		closestUnconnectedNodes := make([]DistancePair, len(junctionBoxes))
+		for i := range len(closestUnconnectedNodes) {
+			closestUnconnectedNodes[i] = DistancePair{math.Inf(1), -1}
 		}
 
 		for i, junctionBox := range junctionBoxes {
 			for j, distance := range junctionBox.distances {
-				if !junctionBox.connected[j] && distance != 0 && minNotConnectedDistances[i].distance > distance {
-					minNotConnectedDistances[i] = DistancePair{distance, j}
+				if i != j && !junctionBox.connected[j] && closestUnconnectedNodes[i].distance > distance {
+					closestUnconnectedNodes[i] = DistancePair{distance, j}
 				}
 			}
 		}
 
-		minNotConnectedDistance := DistancePair{math.Inf(1), -1}
-		minIndex := -1
-		for i, pair := range minNotConnectedDistances {
-			if minNotConnectedDistance.distance > pair.distance {
-				minNotConnectedDistance = pair
-				minIndex = i
+		minConnectionCandidate := DistancePair{math.Inf(1), -1}
+		sourceNodeIndex := -1
+		for i, pair := range closestUnconnectedNodes {
+			if minConnectionCandidate.distance > pair.distance {
+				minConnectionCandidate = pair
+				sourceNodeIndex = i
 			}
 		}
-		if minIndex == -1 {
+		if sourceNodeIndex == -1 {
 			break
 		}
 
-		junctionBoxes[minIndex].connected[minNotConnectedDistance.index] = true
-		junctionBoxes[minNotConnectedDistance.index].connected[minIndex] = true
+		targetNodeIndex := minConnectionCandidate.index
+		junctionBoxes[sourceNodeIndex].connected[targetNodeIndex] = true
+		junctionBoxes[targetNodeIndex].connected[sourceNodeIndex] = true
 
 		visited := make([]bool, len(junctionBoxes))
 		circuits := [][]int{}
 		for i := range junctionBoxes {
 			if !visited[i] {
-				circuit := []int{}
-				dfs(i, junctionBoxes, visited, &circuit)
-				circuits = append(circuits, circuit)
+				var currentCircuit []int
+				dfs(i, junctionBoxes, visited, &currentCircuit)
+				circuits = append(circuits, currentCircuit)
 			}
 		}
 		if len(circuits) == 1 {
-			unifyingConnection = []int{minIndex, minNotConnectedDistance.index}
+			finalConnection = []int{sourceNodeIndex, targetNodeIndex}
 			break
 		}
 	}
 
-	return junctionBoxes[unifyingConnection[0]].position.x * junctionBoxes[unifyingConnection[1]].position.x, nil
+	return junctionBoxes[finalConnection[0]].position.x * junctionBoxes[finalConnection[1]].position.x, nil
 }
 
-func dfs(index int, junctionBoxes []JunctionBox, visited []bool, circuit *[]int) {
-	visited[index] = true
-	*circuit = append(*circuit, index)
+func dfs(nodeIndex int, junctionBoxes []JunctionBox, visited []bool, circuit *[]int) {
+	visited[nodeIndex] = true
+	*circuit = append(*circuit, nodeIndex)
 
-	for connectedIndex := range junctionBoxes[index].connected {
+	for connectedIndex := range junctionBoxes[nodeIndex].connected {
 		if !visited[connectedIndex] {
 			dfs(connectedIndex, junctionBoxes, visited, circuit)
 		}
 	}
 }
 
-func findEucDistance(a Position, b Position) float64 {
-	return math.Sqrt(math.Pow(float64(a.x-b.x), 2) + math.Pow(float64(a.y-b.y), 2) + math.Pow(float64(a.z-b.z), 2))
+func calculateEuclideanDistance(p1 Position, p2 Position) float64 {
+	return math.Sqrt(math.Pow(float64(p1.x-p2.x), 2) + math.Pow(float64(p1.y-p2.y), 2) + math.Pow(float64(p1.z-p2.z), 2))
 }
