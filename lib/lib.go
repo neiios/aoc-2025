@@ -158,3 +158,10 @@ func RemoveEveryNRow(rows []string, n int) []string {
 	}
 	return result
 }
+
+func Abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
