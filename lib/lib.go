@@ -165,3 +165,10 @@ func Abs(x int) int {
 	}
 	return x
 }
+
+func Gcd(a, b int) int {
+	for b != 0 {
+		a, b = b, a%b
+	}
+	return a
+}
