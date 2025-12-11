@@ -22,7 +22,7 @@ func TestSolvePart1(t *testing.T) {
 
 func TestSolvePart2(t *testing.T) {
 	t.Run("test", func(t *testing.T) {
-		expectedResult := 0
+		expectedResult := 33
 
 		result, _ := SolvePart2(input)
 
